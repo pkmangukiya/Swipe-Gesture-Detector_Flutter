@@ -1,148 +1,88 @@
 import 'package:flutter/material.dart';
 
 class SwipeConfiguration {
-  //Vertical swipe configuration options
-  double verticalSwipeMaxWidthThreshold = 50.0;
-  double verticalSwipeMinDisplacement = 100.0;
-  double verticalSwipeMinVelocity = 300.0;
+  final double verticalSwipeMaxWidthThreshold;
+  final double verticalSwipeMinDisplacement;
+  final double verticalSwipeMinVelocity;
 
-  //Horizontal swipe configuration options
-  double horizontalSwipeMaxHeightThreshold = 50.0;
-  double horizontalSwipeMinDisplacement = 100.0;
-  double horizontalSwipeMinVelocity = 300.0;
+  final double horizontalSwipeMaxHeightThreshold;
+  final double horizontalSwipeMinDisplacement;
+  final double horizontalSwipeMinVelocity;
 
-  SwipeConfiguration({
-    double verticalSwipeMaxWidthThreshold,
-    double verticalSwipeMinDisplacement,
-    double verticalSwipeMinVelocity,
-    double horizontalSwipeMaxHeightThreshold,
-    double horizontalSwipeMinDisplacement,
-    double horizontalSwipeMinVelocity,
-  }) {
-    if (verticalSwipeMaxWidthThreshold != null) {
-      this.verticalSwipeMaxWidthThreshold = verticalSwipeMaxWidthThreshold;
-    }
-
-    if (verticalSwipeMinDisplacement != null) {
-      this.verticalSwipeMinDisplacement = verticalSwipeMinDisplacement;
-    }
-
-    if (verticalSwipeMinVelocity != null) {
-      this.verticalSwipeMinVelocity = verticalSwipeMinVelocity;
-    }
-
-    if (horizontalSwipeMaxHeightThreshold != null) {
-      this.horizontalSwipeMaxHeightThreshold = horizontalSwipeMaxHeightThreshold;
-    }
-
-    if (horizontalSwipeMinDisplacement != null) {
-      this.horizontalSwipeMinDisplacement = horizontalSwipeMinDisplacement;
-    }
-
-    if (horizontalSwipeMinVelocity != null) {
-      this.horizontalSwipeMinVelocity = horizontalSwipeMinVelocity;
-    }
-  }
+  const SwipeConfiguration({
+    this.verticalSwipeMaxWidthThreshold = 50.0,
+    this.verticalSwipeMinDisplacement = 100.0,
+    this.verticalSwipeMinVelocity = 300.0,
+    this.horizontalSwipeMaxHeightThreshold = 50.0,
+    this.horizontalSwipeMinDisplacement = 100.0,
+    this.horizontalSwipeMinVelocity = 300.0,
+  });
 }
 
 class SwipeDetector extends StatelessWidget {
   final Widget child;
-  final Function() onSwipeUp;
-  final Function() onSwipeDown;
-  final Function() onSwipeLeft;
-  final Function() onSwipeRight;
+  final VoidCallback? onSwipeUp;
+  final VoidCallback? onSwipeDown;
+  final VoidCallback? onSwipeLeft;
+  final VoidCallback? onSwipeRight;
   final SwipeConfiguration swipeConfiguration;
 
-  SwipeDetector(
-      {@required this.child,
-      this.onSwipeUp,
-      this.onSwipeDown,
-      this.onSwipeLeft,
-      this.onSwipeRight,
-      SwipeConfiguration swipeConfiguration})
-      : this.swipeConfiguration = swipeConfiguration == null
-            ? SwipeConfiguration()
-            : swipeConfiguration;
+  const SwipeDetector({
+    Key? key,
+    required this.child,
+    this.onSwipeUp,
+    this.onSwipeDown,
+    this.onSwipeLeft,
+    this.onSwipeRight,
+    this.swipeConfiguration = const SwipeConfiguration(),
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    //Vertical drag details
-    DragStartDetails startVerticalDragDetails;
-    DragUpdateDetails updateVerticalDragDetails;
+    DragStartDetails? verticalStart;
+    DragUpdateDetails? verticalUpdate;
 
-    //Horizontal drag details
-    DragStartDetails startHorizontalDragDetails;
-    DragUpdateDetails updateHorizontalDragDetails;
+    DragStartDetails? horizontalStart;
+    DragUpdateDetails? horizontalUpdate;
 
     return GestureDetector(
       child: child,
-      onVerticalDragStart: (dragDetails) {
-        startVerticalDragDetails = dragDetails;
-      },
-      onVerticalDragUpdate: (dragDetails) {
-        updateVerticalDragDetails = dragDetails;
-      },
-      onVerticalDragEnd: (endDetails) {
-        double dx = updateVerticalDragDetails.globalPosition.dx -
-            startVerticalDragDetails.globalPosition.dx;
-        double dy = updateVerticalDragDetails.globalPosition.dy -
-            startVerticalDragDetails.globalPosition.dy;
-        double velocity = endDetails.primaryVelocity;
+      onVerticalDragStart: (details) => verticalStart = details,
+      onVerticalDragUpdate: (details) => verticalUpdate = details,
+      onVerticalDragEnd: (end) {
+        if (verticalStart == null || verticalUpdate == null) return;
 
-        //Convert values to be positive
-        if (dx < 0) dx = -dx;
-        if (dy < 0) dy = -dy;
-        double positiveVelocity = velocity < 0 ? -velocity : velocity;
+        final dx = (verticalUpdate!.globalPosition.dx - verticalStart!.globalPosition.dx).abs();
+        final dy = (verticalUpdate!.globalPosition.dy - verticalStart!.globalPosition.dy).abs();
+        final velocity = end.primaryVelocity ?? 0.0;
 
         if (dx > swipeConfiguration.verticalSwipeMaxWidthThreshold) return;
         if (dy < swipeConfiguration.verticalSwipeMinDisplacement) return;
-        if (positiveVelocity < swipeConfiguration.verticalSwipeMinVelocity)
-          return;
+        if (velocity.abs() < swipeConfiguration.verticalSwipeMinVelocity) return;
 
         if (velocity < 0) {
-          //Swipe Up
-          if (onSwipeUp != null) {
-            onSwipeUp();
-          }
+          onSwipeUp?.call();
         } else {
-          //Swipe Down
-          if (onSwipeDown != null) {
-            onSwipeDown();
-          }
+          onSwipeDown?.call();
         }
       },
-      onHorizontalDragStart: (dragDetails) {
-        startHorizontalDragDetails = dragDetails;
-      },
-      onHorizontalDragUpdate: (dragDetails) {
-        updateHorizontalDragDetails = dragDetails;
-      },
-      onHorizontalDragEnd: (endDetails) {
-        double dx = updateHorizontalDragDetails.globalPosition.dx -
-            startHorizontalDragDetails.globalPosition.dx;
-        double dy = updateHorizontalDragDetails.globalPosition.dy -
-            startHorizontalDragDetails.globalPosition.dy;
-        double velocity = endDetails.primaryVelocity;
+      onHorizontalDragStart: (details) => horizontalStart = details,
+      onHorizontalDragUpdate: (details) => horizontalUpdate = details,
+      onHorizontalDragEnd: (end) {
+        if (horizontalStart == null || horizontalUpdate == null) return;
 
-        if (dx < 0) dx = -dx;
-        if (dy < 0) dy = -dy;
-        double positiveVelocity = velocity < 0 ? -velocity : velocity;
+        final dx = (horizontalUpdate!.globalPosition.dx - horizontalStart!.globalPosition.dx);
+        final dy = (horizontalUpdate!.globalPosition.dy - horizontalStart!.globalPosition.dy).abs();
+        final velocity = end.primaryVelocity ?? 0.0;
 
-        if (dx < swipeConfiguration.horizontalSwipeMinDisplacement) return;
+        if (dx.abs() < swipeConfiguration.horizontalSwipeMinDisplacement) return;
         if (dy > swipeConfiguration.horizontalSwipeMaxHeightThreshold) return;
-        if (positiveVelocity < swipeConfiguration.horizontalSwipeMinVelocity)
-          return;
+        if (velocity.abs() < swipeConfiguration.horizontalSwipeMinVelocity) return;
 
         if (velocity < 0) {
-          //Swipe Up
-          if (onSwipeLeft != null) {
-            onSwipeLeft();
-          }
+          onSwipeLeft?.call();
         } else {
-          //Swipe Down
-          if (onSwipeRight != null) {
-            onSwipeRight();
-          }
+          onSwipeRight?.call();
         }
       },
     );
