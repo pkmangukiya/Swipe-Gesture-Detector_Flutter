@@ -62,15 +62,18 @@ SwipeDetector(
 
 ---
 
-## 📄 License
+## 👨‍💻 Maintained By
 
-MIT License — Free to use, distribute, and modify.
+**Paresh Mangukiya**  
+📧 Email: [pkmangukiya@gmail.com](mailto:pkmangukiya@gmail.com)  
+🐙 GitHub: [github.com/pkmangukiya](https://github.com/pkmangukiya)  
+🔗 LinkedIn: [pareshmangukiya](https://in.linkedin.com/in/pareshmangukiya)
 
 ---
 
-## 👨‍💻 Author
+## 🤝 Contributions
 
-**Paresh Mangukiya**  
-🔗 [LinkedIn](https://in.linkedin.com/in/pareshmangukiya)
+Pull requests are welcome!  
+Feel free to open issues for suggestions, improvements, or bug reports.
 
-> Contributions and improvements are welcome!
+---
